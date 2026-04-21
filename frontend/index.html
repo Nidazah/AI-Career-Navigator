@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Career Navigator | Professional CV Analysis & Roadmap</title>
+  <!-- Tailwind CSS for utility-first styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+  <style>
+    /* Custom scrollbar and message styling for a polished UI */
+    .chat-message-container {
+      scroll-behavior: smooth;
+    }
+    .chat-message-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-message-container::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 8px;
+    }
+    .chat-message-container::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 8px;
+    }
+    .message-bubble {
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    .message-user {
+      background: #2563eb;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .message-ai {
+      background: #f3f4f6;
+      color: #1f2937;
+      border-bottom-left-radius: 4px;
+      border: 1px solid #e5e7eb;
+    }
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+  <!-- Header with subtle gradient and improved typography -->
+  <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white py-5 px-6 shadow-md border-b border-blue-900/30">
+    <div class="container mx-auto max-w-6xl">
+      <h1 class="text-3xl font-bold tracking-tight flex items-center justify-center gap-3">
+        <span class="text-3xl"></span> 
+        AI-Powered Career Navigator 
+        <span class="text-sm font-normal bg-white/20 px-3 py-1 rounded-full ml-3 hidden sm:inline-block">Professional Edition</span>
+      </h1>
+      <p class="text-center text-blue-100 mt-2 text-sm font-medium tracking-wide">Upload your CV to receive a detailed skills gap analysis, role recommendations, and a personalized learning roadmap.</p>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8 max-w-6xl space-y-8">
+    
+    <!-- Upload Section: Enhanced with better layout and validation hints -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-shadow hover:shadow-md">
+      <div class="p-6 sm:p-8">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="p-2 bg-blue-50 rounded-lg text-blue-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-semibold text-slate-800">1. Upload Your Curriculum Vitae</h2>
+        </div>
+        <p class="text-slate-600 mb-5 text-sm pl-11">Supported formats: PDF, TXT (Max size 5MB recommended)</p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div class="w-full sm:flex-1">
+            <label for="cvFileInput" class="sr-only">Select CV file</label>
+            <input type="file" id="cvFileInput" accept=".pdf,.txt" class="block w-full text-sm text-slate-600
+              file:mr-5 file:py-2.5 file:px-5
+              file:rounded-lg file:border-0
+              file:text-sm file:font-semibold
+              file:bg-blue-50 file:text-blue-700
+              hover:file:bg-blue-100
+              file:transition-colors file:cursor-pointer
+              border border-slate-300 rounded-lg p-2
+              focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400"/>
+          </div>
+          <button id="analyzeCvButton" class="w-full sm:w-auto bg-blue-700 hover:bg-blue-800 text-white font-medium py-2.5 px-8 rounded-lg shadow-sm transition duration-200 ease-in-out flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+            <span>Analyze CV</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+        <div id="analysisStatusMessage" class="mt-4 text-sm flex items-center gap-2 min-h-[24px] text-slate-500 pl-11"></div>
+      </div>
+    </section>
+
+    <!-- Results Section: Hidden by default, revealed upon analysis -->
+    <section id="analysisResultsSection" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-8 transition-all duration-300">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+        <h2 class="text-2xl font-semibold text-slate-800 flex items-center gap-2">
+          <span class="text-2xl"></span> 
+          Detailed Analysis Report
+        </h2>
+        <span class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-medium border border-emerald-200">AI Generated</span>
+      </div>
+
+      <!-- Skills Matrix -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-slate-50/70 rounded-xl p-5 border border-slate-200">
+          <h3 class="text-lg font-medium text-emerald-700 flex items-center gap-2 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            Current Skill Inventory
+          </h3>
+          <ul id="currentSkillsList" class="space-y-2 pl-7 list-disc text-slate-700 marker:text-emerald-500"></ul>
+        </div>
+        <div class="bg-slate-50/70 rounded-xl p-5 border border-slate-200">
+          <h3 class="text-lg font-medium text-rose-600 flex items-center gap-2 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+            Missing / Growth Areas
+          </h3>
+          <ul id="missingSkillsList" class="space-y-2 pl-7 list-disc text-slate-700 marker:text-rose-500"></ul>
+        </div>
+      </div>
+
+      <!-- Recommended Roles -->
+      <div>
+        <h3 class="text-lg font-medium text-indigo-700 flex items-center gap-2 mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd" />
+          </svg>
+          Recommended Career Pathways
+        </h3>
+        <div id="recommendedRolesContainer" class="flex flex-wrap gap-3 mt-2"></div>
+      </div>
+
+      <!-- Transition Roadmap -->
+      <div>
+        <h3 class="text-lg font-medium text-purple-700 flex items-center gap-2 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+          </svg>
+          Strategic Development Roadmap
+        </h3>
+        <div id="roadmapContainer" class="space-y-4"></div>
+      </div>
+
+      <!-- Chart Visualization -->
+      <div class="bg-slate-50/50 p-5 rounded-xl border border-slate-200">
+        <h3 class="text-lg font-medium text-slate-700 flex items-center gap-2 mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+          </svg>
+          Skill Gap Quantification
+        </h3>
+        <p class="text-sm text-slate-500 mb-4">Comparison of current aggregate proficiency versus target role requirements.</p>
+        <div class="max-w-xl mx-auto h-64">
+          <canvas id="skillGapChartCanvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conversational AI Assistant -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="p-6 sm:p-8">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="p-2 bg-indigo-50 rounded-lg text-indigo-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-semibold text-slate-800">2. Career AI Assistant</h2>
+        </div>
+        <p class="text-slate-600 mb-5 text-sm pl-11">Ask follow-up questions about your roadmap, interview preparation, or specific skill resources.</p>
+        
+        <!-- Chat Message Display Area -->
+        <div id="chatMessageContainer" class="chat-message-container bg-slate-50 border border-slate-200 rounded-lg p-4 mb-5 flex flex-col space-y-3 h-80 overflow-y-auto">
+          <div class="message-bubble message-ai px-4 py-3 rounded-2xl max-w-[85%] self-start text-sm">
+            Hello! I'm your AI Career Advisor. Upload your CV above to start, or ask me about career transitions, skill building, and industry trends.
+          </div>
+        </div>
+
+        <!-- Chat Input Area -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <label for="chatUserInput" class="sr-only">Type your message</label>
+          <input type="text" id="chatUserInput" placeholder="e.g., 'What resources do you recommend for learning system design?'" 
+                 class="flex-1 border border-slate-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-300 bg-white shadow-sm"
+                 autocomplete="off">
+          <button id="sendChatMessageButton" class="bg-indigo-700 hover:bg-indigo-800 text-white font-medium py-3 px-6 rounded-lg shadow-sm transition duration-200 ease-in-out flex items-center justify-center gap-2 disabled:opacity-60">
+            <span>Send</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+            </svg>
+          </button>
+        </div>
+        <p class="text-xs text-slate-400 mt-3 pl-11">The assistant uses the context of your latest CV analysis to provide tailored guidance.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-slate-200 mt-12 py-6 text-center text-sm text-slate-500">
+    <div class="container mx-auto max-w-6xl px-4">
+      AI Career Navigator — Professional Development Tool. Data is processed locally. 
+    </div>
+  </footer>
+
+  <script>
+    (function(){
+      "use strict";
+
+      // ---------- Configuration ----------
+      const API_BASE_URL = "http://localhost:8000";
+      
+      // ---------- DOM Elements ----------
+      const cvFileInput = document.getElementById('cvFileInput');
+      const analyzeBtn = document.getElementById('analyzeCvButton');
+      const statusMsg = document.getElementById('analysisStatusMessage');
+      const resultsSection = document.getElementById('analysisResultsSection');
+      
+      // Result containers
+      const currentSkillsList = document.getElementById('currentSkillsList');
+      const missingSkillsList = document.getElementById('missingSkillsList');
+      const rolesContainer = document.getElementById('recommendedRolesContainer');
+      const roadmapContainer = document.getElementById('roadmapContainer');
+      const chartCanvas = document.getElementById('skillGapChartCanvas');
+      
+      // Chat elements
+      const chatContainer = document.getElementById('chatMessageContainer');
+      const chatInput = document.getElementById('chatUserInput');
+      const sendChatBtn = document.getElementById('sendChatMessageButton');
+      
+      // ---------- State ----------
+      let chartInstance = null;
+      let chatHistory = []; // Stores { role, content } for context
+      
+      // ---------- Utility Functions ----------
+      const setStatus = (text, isError = false) => {
+        statusMsg.textContent = text;
+        statusMsg.className = `mt-4 text-sm flex items-center gap-2 min-h-[24px] ${isError ? 'text-rose-600' : 'text-slate-600'}`;
+      };
+
+      const appendChatMessage = (text, sender) => {
+        const messageDiv = document.createElement('div');
+        const isUser = sender === 'user';
+        messageDiv.className = `message-bubble ${isUser ? 'message-user' : 'message-ai'} px-4 py-3 rounded-2xl max-w-[85%] text-sm ${isUser ? 'self-end' : 'self-start'}`;
+        messageDiv.textContent = text;
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      };
+
+      // ---------- CV Analysis ----------
+      const performCvAnalysis = async () => {
+        const file = cvFileInput.files[0];
+        if (!file) {
+          alert('Please select a CV file (PDF or TXT).');
+          return;
+        }
+
+        // Reset UI
+        resultsSection.classList.add('hidden');
+        setStatus('AI is analyzing your CV... Please wait.');
+        analyzeBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/analyze`, {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Analysis failed (${response.status}): ${errorText || 'Server error'}`);
+          }
+
+          const analysisData = await response.json();
+          renderAnalysisResults(analysisData);
+          setStatus('Analysis completed successfully.');
+          resultsSection.classList.remove('hidden');
+          
+          // Scroll results into view smoothly
+          resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          
+          // Reset chat history and add a contextual welcome message
+          chatHistory = [];
+          // Clear chat except for the first welcome bubble (optional)
+          while (chatContainer.children.length > 1) {
+            chatContainer.removeChild(chatContainer.lastChild);
+          }
+          appendChatMessage('I have analyzed your CV. You can now ask me specific questions about the roadmap, skill gaps, or target roles.', 'ai');
+          
+        } catch (error) {
+          console.error('Analysis error:', error);
+          setStatus(`Error: ${error.message}`, true);
+        } finally {
+          analyzeBtn.disabled = false;
+        }
+      };
+
+      const renderAnalysisResults = (data) => {
+        // Populate lists
+        currentSkillsList.innerHTML = data.current_skills?.map(skill => `<li class="text-sm">${skill}</li>`).join('') || '<li class="text-slate-400 italic">No skills extracted</li>';
+        missingSkillsList.innerHTML = data.missing_skills?.map(skill => `<li class="text-sm">${skill}</li>`).join('') || '<li class="text-slate-400 italic">None identified</li>';
+        
+        // Roles
+        rolesContainer.innerHTML = data.target_roles?.map(role => 
+          `<span class="bg-indigo-50 text-indigo-800 border border-indigo-200 px-4 py-2 rounded-full text-sm font-medium shadow-sm">${role}</span>`
+        ).join('') || '<span class="text-slate-500 italic">No roles suggested</span>';
+
+        // Roadmap
+        if (data.roadmap && data.roadmap.length > 0) {
+          roadmapContainer.innerHTML = data.roadmap.map(step => `
+            <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm hover:shadow transition-shadow">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-10 h-10 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center font-bold text-sm border border-purple-200">${step.step}</div>
+                <div class="flex-1">
+                  <h4 class="font-semibold text-slate-800 text-lg">${step.title}</h4>
+                  <p class="text-sm text-slate-600 mt-1 leading-relaxed">${step.description}</p>
+                  <div class="mt-3 flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 text-xs font-medium px-2.5 py-1 rounded-full">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" /></svg>
+                      ${step.duration}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          roadmapContainer.innerHTML = '<p class="text-slate-500 italic">No roadmap steps available.</p>';
+        }
+
+        // Chart rendering
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
+        const ctx = chartCanvas.getContext('2d');
+        const currentProf = data.skill_scores?.current_proficiency ?? 0;
+        const targetProf = data.skill_scores?.target_proficiency ?? 0;
+        
+        chartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['Current Match', 'Target Requirement'],
+            datasets: [{
+              label: 'Proficiency Score (%)',
+              data: [currentProf, targetProf],
+              backgroundColor: ['#3b82f6', '#10b981'],
+              borderRadius: 8,
+              barPercentage: 0.6,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+                grid: { color: '#e2e8f0' },
+                title: { display: true, text: 'Score (%)' }
+              }
+            },
+            plugins: {
+              tooltip: { backgroundColor: '#1e293b' },
+              legend: { display: false }
+            }
+          }
+        });
+      };
+
+      // ---------- Chat Handling ----------
+      const sendChatMessage = async () => {
+        const message = chatInput.value.trim();
+        if (!message) return;
+        
+        appendChatMessage(message, 'user');
+        chatInput.value = '';
+        chatHistory.push({ role: 'user', content: message });
+        
+        // Disable input temporarily
+        chatInput.disabled = true;
+        sendChatBtn.disabled = true;
+        
+        try {
+          const response = await fetch(`${API_BASE_URL}/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              message: message, 
+              history: chatHistory 
+            })
+          });
+          
+          if (!response.ok) throw new Error('Chat service unavailable');
+          
+          const data = await response.json();
+          const aiReply = data.response || 'I apologize, but I could not generate a response.';
+          appendChatMessage(aiReply, 'ai');
+          chatHistory.push({ role: 'assistant', content: aiReply });
+          
+        } catch (error) {
+          console.error('Chat error:', error);
+          appendChatMessage('Unable to connect to the AI assistant. Please ensure the backend is running.', 'ai');
+        } finally {
+          chatInput.disabled = false;
+          sendChatBtn.disabled = false;
+          chatInput.focus();
+        }
+      };
+
+      // ---------- Event Listeners ----------
+      analyzeBtn.addEventListener('click', performCvAnalysis);
+      sendChatBtn.addEventListener('click', sendChatMessage);
+      chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendChatMessage();
+        }
+      });
+      
+      // Initial status message
+      setStatus('Ready to analyze. Please select a file.', false);
+      
+    })();
+  </script>
+</body>
+</html>
