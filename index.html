@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Career Navigator | Professional CV Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            min-height: 100vh;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+        
+        .glass-dark {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .chat-container {
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .chat-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .chat-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .drop-zone {
+            transition: all 0.3s ease;
+            border: 2px dashed #cbd5e1;
+        }
+        
+        .drop-zone.dragover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+            transform: scale(1.02);
+        }
+        
+        .prose h1,
+        .prose h2,
+        .prose h3 {
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .prose ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .prose p {
+            margin-bottom: 0.75rem;
+        }
+        
+        .prose code {
+            background: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+        
+        .skill-tag {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+        
+        .skill-tag:hover {
+            transform: scale(1.05);
+        }
+        
+        .step-indicator {
+            width: 32px;
+            height: 32px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+        
+        .typing-dots span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #94a3b8;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1.4s infinite both;
+        }
+        
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-8px);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="glass fixed top-0 left-0 right-0 z-50 border-b border-slate-200/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-900">AI Career Navigator</h1>
+                        <p class="text-xs text-slate-500">Professional Edition</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="hidden sm:flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full border border-slate-200">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <span class="text-sm text-slate-600 font-medium">Online</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Column -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- Upload Section -->
+                <div class="glass rounded-2xl p-6">
+                    <h2 class="text-lg font-semibold text-slate-900 mb-4">1. Upload Your CV</h2>
+
+                    <div id="dropZone" class="drop-zone rounded-xl p-8 text-center cursor-pointer">
+                        <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M24 32V16m0 0l-8 8m8-8l8 8M8 40h32a4 4 0 004-4V12a4 4 0 00-4-4H8a4 4 0 00-4 4v24a4 4 0 004 4z"></path>
+                        </svg>
+                        <p class="mt-2 text-sm text-slate-600">
+                            <span class="font-semibold text-blue-600">Click to upload</span> or drag and drop
+                        </p>
+                        <p class="text-xs text-slate-500 mt-1">PDF or TXT (Max 5MB)</p>
+                        <input type="file" id="fileInput" class="hidden" accept=".pdf,.txt">
+                    </div>
+
+                    <div id="fileInfo" class="mt-3 hidden">
+                        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span id="fileName" class="text-sm font-medium text-slate-700"></span>
+                            </div>
+                            <button id="removeFile" class="text-red-500 hover:text-red-700 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button id="analyzeBtn" disabled
+                        class="mt-4 w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium py-3 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-xl hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                        Analyze CV
+                    </button>
+
+                    <div id="statusMessage" class="mt-3 text-sm text-center hidden"></div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultsCard" class="glass rounded-2xl p-6 hidden fade-in">
+                    <h2 class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Analysis Report
+                    </h2>
+
+                    <!-- Skills Overview -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                            <h3 class="text-sm font-semibold text-green-800 mb-3">Current Skills</h3>
+                            <div id="currentSkills" class="flex flex-wrap gap-2"></div>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-xl border border-red-100">
+                            <h3 class="text-sm font-semibold text-red-800 mb-3">Skills to Develop</h3>
+                            <div id="missingSkills" class="flex flex-wrap gap-2"></div>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                            <h3 class="text-sm font-semibold text-blue-800 mb-3">Target Roles</h3>
+                            <div id="targetRoles" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Skill Scores -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-8">
+                        <h3 class="text-sm font-semibold text-slate-700 mb-4">Skill Gap Analysis</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                    <span>Current Proficiency</span>
+                                    <span id="currentScoreText">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                                    <div id="currentScoreBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                    <span>Target Proficiency</span>
+                                    <span id="targetScoreText">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                                    <div id="targetScoreBar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Roadmap -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-700 mb-4">Career Roadmap</h3>
+                        <div id="roadmapContainer" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Chat -->
+            <div class="lg:col-span-1">
+                <div class="glass rounded-2xl p-6 sticky top-24">
+                    <h2 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                        </svg>
+                        AI Assistant
+                    </h2>
+
+                    <div id="chatMessages" class="chat-container pr-2 mb-4 space-y-3">
+                        <div class="flex justify-start fade-in">
+                            <div class="max-w-[85%] p-3 rounded-2xl bg-white text-slate-800 shadow-sm border border-slate-200 rounded-bl-none text-sm">
+                                👋 Hello! I'm your AI Career Advisor. Upload your CV to get started, or ask me any career-related questions!
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <input type="text" id="chatInput" placeholder="Ask about your roadmap..."
+                            class="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <button id="sendBtn"
+                            class="bg-blue-600 text-white p-2.5 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center text-xs text-slate-500 border-t border-slate-200/50">
+        AI Career Navigator — Professional Development Tool
+    </footer>
+
+    <script>
+        // ==================== State ====================
+        const state = {
+            file: null,
+            isAnalyzing: false,
+            chatHistory: [],
+            analysisData: null
+        };
+
+        // ==================== DOM Elements ====================
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const removeFile = document.getElementById('removeFile');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const resultsCard = document.getElementById('resultsCard');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        // ==================== File Upload ====================
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        removeFile.addEventListener('click', () => {
+            state.file = null;
+            fileInput.value = '';
+            fileInfo.classList.add('hidden');
+            analyzeBtn.disabled = true;
+            analyzeBtn.dataset.ready = 'false';
+            showStatus('', '');
+        });
+
+        function handleFile(file) {
+            // Validate file type
+            const validTypes = ['application/pdf', 'text/plain'];
+            const validExtensions = ['.pdf', '.txt'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (!validTypes.includes(file.type) && !validExtensions.includes(fileExt)) {
+                showStatus('Please upload a PDF or TXT file.', 'text-red-600');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                showStatus('File too large. Maximum size is 5MB.', 'text-red-600');
+                return;
+            }
+
+            state.file = file;
+            fileName.textContent = file.name;
+            fileInfo.classList.remove('hidden');
+            analyzeBtn.disabled = false;
+            analyzeBtn.dataset.ready = 'true';
+            showStatus(`✓ ${file.name} ready for analysis`, 'text-green-600');
+        }
+
+        function showStatus(msg, colorClass) {
+            if (!msg) {
+                statusMessage.classList.add('hidden');
+                return;
+            }
+            statusMessage.textContent = msg;
+            statusMessage.className = `mt-3 text-sm text-center ${colorClass}`;
+            statusMessage.classList.remove('hidden');
+        }
+
+        // ==================== CV Analysis ====================
+        analyzeBtn.addEventListener('click', async () => {
+            if (!state.file || state.isAnalyzing) return;
+
+            state.isAnalyzing = true;
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '<div class="loader mx-auto"></div>';
+            showStatus('Analyzing your CV... This may take a moment.', 'text-blue-600');
+
+            const formData = new FormData();
+            formData.append('file', state.file);
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                state.analysisData = data;
+                renderResults(data);
+                showStatus('✓ Analysis complete! Scroll down to see your roadmap.', 'text-green-600');
+
+                // Auto-send initial chat message
+                await sendChatMessage(
+                    `I just uploaded my CV and received my analysis. Based on the results, what should be my immediate next step?`,
+                    true
+                );
+
+            } catch (error) {
+                console.error('Analysis error:', error);
+                showStatus(`Error: ${error.message}`, 'text-red-600');
+            } finally {
+                state.isAnalyzing = false;
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = 'Analyze CV';
+            }
+        });
+
+        function renderResults(data) {
+            resultsCard.classList.remove('hidden');
+
+            // Skills
+            const renderSkills = (containerId, skills, color) => {
+                const container = document.getElementById(containerId);
+                container.innerHTML = skills.map(skill =>
+                    `<span class="skill-tag bg-white border border-${color}-200 text-${color}-700">${skill}</span>`
+                ).join('');
+            };
+
+            renderSkills('currentSkills', data.current_skills || [], 'green');
+            renderSkills('missingSkills', data.missing_skills || [], 'red');
+            renderSkills('targetRoles', data.target_roles || [], 'blue');
+
+            // Skill Scores
+            const currentScore = data.skill_scores?.current_proficiency || 0;
+            const targetScore = data.skill_scores?.target_proficiency || 0;
+
+            setTimeout(() => {
+                document.getElementById('currentScoreBar').style.width = `${currentScore}%`;
+                document.getElementById('currentScoreText').textContent = `${currentScore}%`;
+                document.getElementById('targetScoreBar').style.width = `${targetScore}%`;
+                document.getElementById('targetScoreText').textContent = `${targetScore}%`;
+            }, 200);
+
+            // Roadmap
+            const roadmapContainer = document.getElementById('roadmapContainer');
+            roadmapContainer.innerHTML = (data.roadmap || []).map((step, index) => `
+                    <div class="flex gap-4 pb-6 border-l-2 border-blue-200 pl-5 relative ml-2 last:border-0 last:pb-0">
+                        <div class="step-indicator absolute -left-4 top-0">${index + 1}</div>
+                        <div class="pt-0.5 ml-2">
+                            <h4 class="font-semibold text-slate-800 text-sm">${step.title || 'Step'}</h4>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">${step.description || ''}</p>
+                            ${step.duration ? `<span class="inline-block mt-2 text-[10px] font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full uppercase tracking-wide">${step.duration}</span>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+            resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ==================== Chat ====================
+        sendBtn.addEventListener('click', () => handleChatSend());
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleChatSend();
+        });
+
+        async function handleChatSend() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            chatInput.value = '';
+            await sendChatMessage(message, false);
+        }
+
+        async function sendChatMessage(message, isAuto) {
+            // Add user message
+            if (!isAuto) {
+                appendMessage('user', message);
+            }
+
+            state.chatHistory.push({ role: 'user', content: message });
+
+            // Show typing indicator
+            const typingId = appendTypingIndicator();
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        history: state.chatHistory.slice(0, -1)
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Chat error');
+                }
+
+                // Remove typing indicator
+                removeTypingIndicator(typingId);
+
+                // Add assistant response
+                const responseText = data.response || 'I apologize, but I encountered an error. Please try again.';
+                appendMessage('assistant', responseText);
+                state.chatHistory.push({ role: 'assistant', content: responseText });
+
+            } catch (error) {
+                console.error('Chat error:', error);
+                removeTypingIndicator(typingId);
+                appendMessage('assistant', `I apologize, but I encountered an error: ${error.message}. Please try again.`);
+            }
+        }
+
+        function appendMessage(role, content) {
+            const container = chatMessages;
+            const div = document.createElement('div');
+            div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} fade-in`;
+
+            const bubble = document.createElement('div');
+            const isUser = role === 'user';
+            bubble.className =
+                `max-w-[85%] p-3 rounded-2xl text-sm ${isUser ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white text-slate-800 shadow-sm border border-slate-200 rounded-bl-none prose'}`;
+
+            if (isUser) {
+                bubble.textContent = content;
+            } else {
+                // Use marked to render markdown
+                try {
+                    bubble.innerHTML = marked.parse(content);
+                } catch {
+                    bubble.textContent = content;
+                }
+            }
+
+            div.appendChild(bubble);
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function appendTypingIndicator() {
+            const container = chatMessages;
+            const id = 'typing-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = 'flex justify-start fade-in';
+            div.innerHTML = `
+                    <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-200 rounded-bl-none">
+                        <div class="typing-dots flex gap-1">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            return id;
+        }
+
+        function removeTypingIndicator(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.remove();
+            }
+        }
+
+        // ==================== Keyboard Shortcuts ====================
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+Enter or Cmd+Enter to send chat
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                handleChatSend();
+            }
+        });
+
+        // ==================== Initialization ====================
+        console.log('🚀 AI Career Navigator loaded successfully!');
+        console.log('ℹ️  Upload your CV to get started.');
+    </script>
+</body>
+</html>
