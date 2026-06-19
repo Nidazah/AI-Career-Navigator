@@ -1,5 +1,67 @@
-venv/
-.env
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pythonenv*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Uploads
+uploads/
+temp/
+
+# Database
+*.db
+*.sqlite
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Production
+dist/
+build/
+*.egg-info/
+
+# Node modules (if any)
+node_modules/
+
+# API keys and secrets
+*.pem
+*.key
+*.crt
+
+# Frontend build
+*.min.js
+*.min.css
+
+# Virtual Environment
+venv/
+env/
+ENV/
