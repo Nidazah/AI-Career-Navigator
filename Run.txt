@@ -1,0 +1,172 @@
+### 1. Open your project folder
+
+Open **PowerShell**.
+
+Go to the folder where these 3 files are located:
+
+* `main.py`
+* `index.html`
+* `requirements.txt`
+
+You should see `main.py`, `index.html`, and `requirements.txt`.
+
+---
+
+### 2. Create a virtual environment
+
+Run:
+
+```powershell
+python -m venv venv
+```
+
+Then activate it:
+
+```powershell
+venv\Scripts\Activate.ps1
+```
+
+If PowerShell gives you a **script blocked** error, run:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
+Then:
+
+```powershell
+venv\Scripts\Activate.ps1
+```
+
+If it worked, you should see something like:
+
+```text
+(venv) PS C:\Users\786\...
+```
+
+The `(venv)` means it is activated. ✅
+
+---
+
+### 3. Install everything
+
+Now run:
+
+```powershell
+pip install -r requirements.txt
+```
+
+Wait until it finishes.
+
+This installs the packages your project needs, such as FastAPI, Uvicorn, OpenAI/Groq-related packages, PDF tools, etc.
+
+---
+
+### 4. Add your Groq API key
+
+Inside the **same folder as `main.py`**, create a file named:
+
+```text
+.env
+```
+
+Put this inside:
+
+```text
+GROQ_API_KEY=your_actual_groq_key_here
+```
+
+Replace `your_actual_groq_key_here` with your real Groq API key.
+
+For example:
+
+```text
+GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxx
+```
+
+**Don't put quotes around the key.**
+
+---
+
+### 5. Start your website
+
+Make sure `(venv)` is still showing in PowerShell.
+
+Run:
+
+```powershell
+uvicorn main:app --reload
+```
+
+You should see something similar to:
+
+```text
+Uvicorn running on http://127.0.0.1:8000
+Application startup complete
+```
+
+Keep this PowerShell window **open**.
+
+---
+
+### 6. Open the website
+
+Open Chrome and go to:
+
+**[http://127.0.0.1:8000](http://127.0.0.1:8000)**
+
+Important: **Don't open it using Live Server / port 5500.**
+
+Your FastAPI server is running on **8000**.
+
+---
+
+### 7. Check if the AI is working
+
+Open this in Chrome:
+
+**[http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)**
+
+You should get something like:
+
+```json
+{
+  "status": "healthy",
+  "model": "openai/gpt-oss-20b",
+  "api_key_configured": true
+}
+```
+
+The important part is:
+
+```text
+"api_key_configured": true
+```
+
+That means your API key was successfully loaded. ✅
+
+Then go back to:
+
+**[http://127.0.0.1:8000](http://127.0.0.1:8000)**
+
+Upload your CV and click **Analyze**.
+
+### In short, the commands are:
+
+```powershell
+cd "YOUR_PROJECT_FOLDER"
+
+python -m venv venv
+
+venv\Scripts\Activate.ps1
+
+pip install -r requirements.txt
+
+uvicorn main:app --reload
+```
+
+And then open:
+
+```text
+http://127.0.0.1:8000
+```
